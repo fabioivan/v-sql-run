@@ -1,0 +1,35 @@
+{
+	"name": "v-sqlrun",
+	"version": "1.0.0",
+	"description": "Execute Sql scripts in a server with multiple databases",
+	"main": "index.js",
+  "node": "18.16.0",
+	"scripts": {
+    "build": "npm run clean && npm run tsc && npm run chmod",
+		"start": "node bin/index.js",
+		"dev": "ts-node src/index.ts",
+		"tsc": "tsc",
+    "chmod": "chmod u+x ./bin/index.js",
+    "clean": "rm -rf ./bin"
+	},
+	"bin": {
+		"vsqlrun": "./bin/index.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@gitbeaker/rest": "^39.27.0",
+		"@types/commander": "^2.12.2",
+		"@types/node": "^22.5.4",
+		"@types/pg": "^8.11.9",
+		"simple-git": "^3.27.0",
+		"typescript": "^5.6.2"
+	},
+	"devDependencies": {
+		"chalk": "^4.0.0",
+		"commander": "^12.1.0",
+		"dotenv": "^16.4.5",
+		"pg": "^8.12.0"
+	}
+}

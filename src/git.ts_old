@@ -1,0 +1,113 @@
+import { Gitlab, SimpleLabelSchema } from '@gitbeaker/rest';
+import simpleGit from 'simple-git';
+import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+
+dotenv.config();
+
+/**
+  Busca o SQL presente na issue da branch que está sendo mergeada
+  @returns {string|null} SQL
+*/
+async function getSqlFromIssue(): Promise<string | null> {
+
+  const issueNumber = await getIssueNumber();
+
+  const obj = await getIssueDescription(issueNumber);
+
+  return extractSQLFromDescription(obj.description);
+
+}
+
+/**
+ *  Busca o número da issue que está sendo mergeada
+ * @returns {string} Número da issue
+ */
+async function getIssueNumber(): Promise<string> {
+  // Verifica se está ocorrendo um merge (checando o arquivo MERGE_HEAD)
+  const mergeHeadPath = '.git/MERGE_HEAD';
+  if (!fs.existsSync(mergeHeadPath)) {
+    console.log('Nenhuma operação de merge detectada.');
+    process.exit(1);
+  }
+
+  // Lê o conteúdo do arquivo .git/MERGE_HEAD (contém o commit da branch que está sendo mergeada)
+  const mergeCommitHash = fs.readFileSync(mergeHeadPath, 'utf8').trim();
+
+  // Usa simple-git para obter as branches e commits
+  const git = simpleGit();
+  const log = await git.log({ '-1': null, [mergeCommitHash]: null });
+  const mergeBranch = log.latest?.refs?.split(' ')[0]; // A branch que está sendo mergeada
+
+  if (!mergeBranch) {
+    console.error('Não foi possível determinar a branch que está sendo mergeada.');
+    process.exit(1);
+  }
+
+  console.log(`Branch sendo mergeada: ${mergeBranch}`);
+
+  // Extrai o número da issue da branch
+  const issueNumberMatch = mergeBranch.match(/^(\d+)-/);
+
+  if (!issueNumberMatch) {
+    console.error('Nenhum número de issue encontrado na branch sendo mergeada.');
+    process.exit(1);
+  }
+
+  return issueNumberMatch[1];
+}
+
+/**
+ * Busca a descrição da issue
+ * @param issueNumber Número da Issue
+ * @returns {string} Descrição completa da issue
+ */
+async function getIssueDescription(issueNumber:string): Promise<{description: string, hasLabels: boolean}> {
+
+  // Inicializa o cliente GitLab
+  const api = new Gitlab({
+    token: process.env.GITLAB_TOKEN!,
+  });
+
+  try {
+    // Busca a issue no GitLab com base no número extraído
+    const issue = await api.Issues.show(process.env.GITLAB_PROJECT_ID!, parseInt(issueNumber));
+
+    // Verifica se a descrição existe e está preenchida
+    if (!issue.description || issue.description.trim() === '') {
+      console.error(`A issue #${issueNumber} não tem uma descrição. Abortando o commit.`);
+      process.exit(1); // Sai com erro para abortar o commit
+    }
+
+    if (containsSqlLabel(issue.labels)) {
+      return { description: issue.description, hasLabels: true };
+    }
+
+    return { description: issue.description, hasLabels: false }
+  } catch (error) {
+    console.error(`Erro ao buscar a issue #${issueNumber}:`, error);
+    process.exit(1); // Sai com erro para abortar o commit
+  }
+}
+
+function extractSQLFromDescription(description: string): string | null {
+  // Expressão regular para capturar o texto entre ```sql e ```
+  const sqlMatch = description.match(/```sql\s*([\s\S]*?)\s*```/);
+
+  // Se encontrou um bloco SQL, retorna o conteúdo capturado
+  if (sqlMatch && sqlMatch[1]) {
+    return sqlMatch[1].trim();
+  }
+
+  // Caso não encontre nenhum bloco SQL
+  return null;
+}
+
+function containsSqlLabel(labels:string[] | SimpleLabelSchema[]): boolean {
+  if (typeof labels[0] === 'string') {
+    return (labels as string[]).includes('[GLOBAL] - SQL');
+  }
+
+  // Se as labels forem objetos, verifica a propriedade 'name' de cada objeto
+  return (labels as SimpleLabelSchema[]).some(label => label.name === '[GLOBAL] - SQL');
+}
