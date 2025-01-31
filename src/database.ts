@@ -1,12 +1,10 @@
 import { Client } from "pg";
 import chalk from "chalk";
-import * as dotenv from "dotenv";
-
-dotenv.config();
+import { ConfigManager } from "./configurationManager";
 
 // Função para obter a lista de bases de dados
 export async function getDatabases(): Promise<string[]> {
-	const client = getDatabaseConnection("postgres");
+	const client = await getDatabaseConnection("postgres");
 
 	try {
 		await client.connect();
@@ -40,7 +38,7 @@ export async function executeScriptInDatabase(
 	database: string,
 	script: string,
 ): Promise<void> {
-	const client = getDatabaseConnection(database);
+	const client = await getDatabaseConnection(database);
 
 	try {
 		await client.connect();
@@ -48,7 +46,6 @@ export async function executeScriptInDatabase(
 		console.log(
 			chalk.green(`✔️ Script executado com sucesso no banco ${database}`),
 		);
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	} catch (error: any) {
 		parseDatabaseErros(error, database);
 	} finally {
@@ -56,11 +53,14 @@ export async function executeScriptInDatabase(
 	}
 }
 
-function getDatabaseConnection(database: string): Client {
+async function getDatabaseConnection(database: string): Promise<Client> {
+    var configManager = new ConfigManager();
+    var config = configManager.getConfig();
+
 	return new Client({
-		host: process.env.DB_HOST,
-		user: process.env.DB_USER,
-		password: process.env.DB_PASS,
+		host: config?.host,
+		user: config?.username,
+		password: config?.password,
 		database,
 	});
 }

@@ -1,72 +1,103 @@
-![enter image description here](https://grupovoalle.com.br/site/assets/images/logo-1.png)
-# # SynGwBasicStruct
+# 🌟 V-SQL-Run
 
-Módulo criado para agilizar a criação dos arquivos básicos  que se sucedem a criação de uma nova Entidade no projeto SynGw.
+## 🎯 Descrição
 
-## Como instalar:
+`vsqlrun` é uma ferramenta de linha de comando (CLI) desenvolvida em Node.js para executar scripts SQL em múltiplas bases de dados dentro de um mesmo banco.
 
-Clonar o repositório dentro da pasta `home/voalle/projects`
+---
 
-Acessar a pasta do repositório e instalar as dependências, pelo comando:
+## 📥 Instalação
 
-    npm install
-    
-Após atualizado as dependências, basta fazer o build do projeto
+### 1️⃣ Clonar o repositório
+```sh
+git clone git@github.com:fabioivan/v-sql-run.git
+cd v-sql-run
+```
 
-    yarn build
+### 2️⃣ Instalar dependências
+```sh
+yarn install
+```
+🛠️ *Instalando pacotes necessários...*
 
-Para que se possa utilizar o módulo de qualquer lugar, basta rodar o comando:
+### 3️⃣ Configuração do Projeto
+Quando iniciado pela primeira vez, `vsqlrun` irá detectar o arquivo de configuração inicial. Caso não encontre, ele iniciará um comando pedindo os dados de acesso ao banco.
 
-    npm link
+- Para resetar esses dados, utilize o comando:
+  ```sh
+  vsqlrun config -r
+  ```
+- Para verificar a configuração ativa no momento, execute:
+  ```sh
+  vsqlrun config -s
+  ```
 
-Pronto, está tudo configurado!
+### 4️⃣ Construir o projeto
+```sh
+yarn build
+```
+⚙️ *Gerando os arquivos do executável...*
 
-## Como utilizar:
+### 5️⃣ Configurar a CLI localmente
+```sh
+npm link
+```
+🔗 *Configurando vsqlrun no sistema...*
 
-Para saber as opções(argumentos) que podem ser passados para o módulo, basta digitar no terminal:
+---
 
-       createGwFiles -h
-Será exibido as opções que podem ser inseridas para a correta configuração, para criar os arquivos:
+## 🚀 Uso
 
-    Usage: createGwFiles [options]
-    Options:
-      -m, --module <module name>  Nome do módulo que será usado
-      -e, --entity <entity name>  Nome da entidade a ser criada
-      -s, --isSoft                Define se a entidade será do tipo EntitySoft ou EntityBase
-      -h, --help                  display help for command
+Para executar um script SQL em todas as bases de dados:
+```sh
+vsqlrun run -s <arquivo.sql>
+```
+
+Para especificar bases de dados:
+```sh
+vsqlrun run -s <arquivo.sql> -d "base1,base2,base3"
+```
+
+### 🔧 Parâmetros
+
+| Parâmetro | Alias | Descrição |
+|------------|-------|-------------|
+| `--script` | `-s`  | 📜 Caminho do arquivo SQL a ser executado |
+| `--databases` | `-d`  | 🗄️ Lista de nomes das bases de dados separadas por `,` |
+
+---
+
+## 🎬 Exemplo de Uso
+
+Executando `script.sql` em todas as bases:
+```sh
+vsqlrun run -s script.sql
+```
+
+Executando `script.sql` em bases específicas:
+```sh
+vsqlrun run -s script.sql -d "base1,base2"
+```
+
+📌 *Dica: Certifique-se de que as bases existem antes de executar!* ✅
 
 
-Dentre as opções, são obrigatórias as opções `-m <module name>` e `-e <entity name>`, caso elas fiquem em branco, será solicitado para inseri-las posteriormente.
-Tanto o nome do módulo quanto o nome da entidade, devem ser inseridos com a primeira letra maiúscula, mas caso não seja inserido desta forma, o módulo irá corrigir automaticamente.
+---
 
-Caso o módulo não for encontrado, será solicitado para selecionar o módulo correto, dentre uma lista, que é alimentada automaticamente, conforme a própria estrutura do SynGw.
 
-Caso o nome da Entidade não seja inserida no plural, ou seja, terminando com a letra "s", o módulo irá solicitar que o usuário insira novamente o nome da Entidade, com a formatação correta.
+## 📦 Pacote NPM
 
-Caso o nome da Entidade seja composta, pode-se inserir um "_" entre as palavras ou colocar as palavras entre aspas duplas ("exemplo de Entidade") que o nome será convertido para a padrão PascalCase.
+O `vsqlrun` também está disponível no NPM! Você pode instalá-lo globalmente através do seguinte comando:
 
-Caso não seja inserido a opção `-s`, que indica a utilização da EntitySoft na herança da Entidade e de suas adjacentes, a estrutura será criada usando a EntityBase.
+```sh
+npm install -g @fabioivan/v-sqlrun
+```
 
-Se tudo estiver ok, após as validações necessárias, é apresentado uma lista de arquivos a serem criados, com seus respectivos caminhos relativos, para que o usuário possa conferir, e é apresentado uma mensagem solicitando que o usuário confirme a criação dos arquivos:
+Para mais detalhes, acesse a página oficial no NPM:
+🔗 [@fabioivan/v-sqlrun](https://www.npmjs.com/package/@fabioivan/v-sqlrun)
 
->  ? Deseja criar os arquivos acima? (y/N) ‣ false
+---
 
-Basta digitar a letra "y" no teclado que será criado os arquivos.
-Caso haja algum problema na criação dos arquivos, será exibido uma lista com os arquivos que não foram criados, e o respectivo erro.
+## 📝 Licença
 
-Ao final será exibido uma mensagem notificando o usuário a não esquecer de configurar alguns arquivos:
-
-✔ Arquivos criados com sucesso.
-
-   ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-   │                                                                                                                       │
-   │   Não esqueça de:                                                                                                     |
-   |                                                                                                                       │
-   │   Ajustar o Mapping no Context em: src/Syntesis.SynGW.Infra.Data.Context/Modules/Suite/Context.Suite.cs               │
-   │   Adiconar o Map das entidades em: src/Syntesis.SynGW.AutoMapper/Profiles/Modules/Suite/ViewModelToDomain.Suite.cs    │
-   │   Adicionar o Map das entidades em: src/Syntesis.SynGW.AutoMapper/Profiles/Modules/Suite/DomainToViewModel.Suite.cs   │
-   │                                                                                                                       │
-   └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-Tudo pronto, basta acessar seu projeto do SynGw e conferir os arquivos, e fazer as modificações necessárias.
-
+Este projeto é distribuído sob a licença MIT.
