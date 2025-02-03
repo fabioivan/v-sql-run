@@ -1,7 +1,7 @@
 {
 	"name": "@fabioivan/v-sqlrun",
-    "private": false,
-	"version": "1.0.2",
+	"private": false,
+	"version": "1.0.4",
 	"description": "Execute Sql scripts in a server with multiple databases",
 	"main": "index.js",
 	"node": "18.18.0",
@@ -16,10 +16,10 @@
 	"bin": {
 		"vsqlrun": "./bin/index.js"
 	},
-    "files": [
-        "bin",
-        "Readme.md"
-    ],
+	"files": [
+		"bin",
+		"Readme.md"
+	],
 	"author": "Fábio Ivan Borchardt",
 	"license": "ISC",
 	"dependencies": {
@@ -27,10 +27,8 @@
 		"@types/node": "^22.5.4",
 		"@types/pg": "^8.11.9",
 		"inquirer": "^12.3.3",
-		"typescript": "^5.6.2"
-	},
-	"devDependencies": {
-		"chalk": "^4.0.0",
+		"typescript": "^5.6.2",
+        "chalk": "^4.0.0",
 		"commander": "^12.1.0",
 		"pg": "^8.12.0"
 	}
